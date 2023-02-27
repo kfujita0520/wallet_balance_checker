@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+require('dotenv').config();
 
 
 
@@ -148,7 +149,7 @@ router.get('/getBalance', async function(req, res, next) {
         rate = req.session.eur;
     }
 
-    await axios.get(`https://api.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest&apikey=YourApiKeyToken`)
+    await axios.get(`https://api.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest&apikey=${process.env.ETHERSCAN_API_KEY}`)
         .then(response => {
             // Convert balance from wei to ETH
             ethAmount = Number(response.data.result) / 10 ** 18;
@@ -186,7 +187,7 @@ router.get('/checkOldWallet', async function(req, res, next) {
         return res.json(response);
     }
 
-    let txlist = await axios.get(`https://api.etherscan.io/api?module=account&action=txlist&address=${walletAddress}&startblock=0&page=1&offset=3&sort=desc&APIKey=NSZCD6S4TKVWRS13PMQFMVTNP6H7NAGHUY`)
+    let txlist = await axios.get(`https://api.etherscan.io/api?module=account&action=txlist&address=${walletAddress}&startblock=0&page=1&offset=3&sort=desc&APIKey=${process.env.ETHERSCAN_API_KEY}`)
     console.log('response.data.status', txlist.data.status);
     if(txlist.data.status === "0"){
         //TODO complete new account address having 0 transaction also categorized here and considered as wrong input.

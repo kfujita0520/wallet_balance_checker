@@ -6,11 +6,13 @@ var logger = require('morgan');
 var session = require('express-session');
 var MemoryStore = require('memorystore')(session);
 const uuidv4 = require('uuid').v4;
+require('dotenv').config();
 
 var indexRouter = require('./routes/index');
 
 var app = express();
 const port = 4000;
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
