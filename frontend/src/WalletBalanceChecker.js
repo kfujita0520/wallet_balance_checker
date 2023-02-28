@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import './walletBalance.css';
+import { ethers } from 'ethers';
 
 const apiHost = process.env.REACT_APP_API_HOST;
 
@@ -9,6 +10,7 @@ class RateEditor extends React.Component {
         super(props);
         this.state = {
             isEditing: false,
+            isValidInput: true,
             editedRate: this.props.ethRate,
             currency: this.props.currency,
         };
@@ -39,7 +41,16 @@ class RateEditor extends React.Component {
     };
 
     handleEditedTextChange(event) {
-        this.setState({ editedRate: event.target.value });
+        if(/^\d*\.?\d*$/.test(event.target.value)){//input format should be ddd.dd
+            let rate = event.target.value;
+            if(rate === ""){ //if blank, set 0.00
+                rate = "0.00";
+            }
+            this.setState({ editedRate: rate });
+            this.setState({ isValidInput: true});
+        } else { //input format is wrong
+            this.setState({ isValidInput: false});
+        }
     };
 
     showRateInfo() {
@@ -55,8 +66,9 @@ class RateEditor extends React.Component {
             return (
                 <div>
                     <input type="text" value={this.state.editedRate} onChange={ (e) => { this.handleEditedTextChange(e) }} />
-                    <button onClick={(e)=>{this.handleSaveClick(e)}}>Save</button>
+                    <button disabled={!this.state.isValidInput} onClick={(e)=>{this.handleSaveClick(e)}}>Save</button>
                     <button onClick={()=>this.handleCancelClick()}>Cancel</button>
+                    {!this.state.isValidInput && <div style={{ color: "red" }}>Please enter a valid number</div>}
                 </div>
             );
         } else {
@@ -84,6 +96,7 @@ class WalletBalanceChecker extends React.Component {
             ethBalance: '0.00',
             walletAddress: '',
             isOld: false,
+            isValidAddress: false,
         };
 
         // this.handleWalletAddressChange = this.handleWalletAddressChange.bind(this);
@@ -100,7 +113,14 @@ class WalletBalanceChecker extends React.Component {
     }
 
     handleWalletAddressChange(event) {
-        this.setState({ walletAddress: event.target.value });
+
+        if(ethers.isAddress(event.target.value)){
+            this.setState({ walletAddress: event.target.value, isValidAddress: true });
+        } else {
+            this.setState({ walletAddress: event.target.value, isValidAddress: false });
+        }
+
+
     }
 
     handleCheckBalanceClick() {
@@ -201,7 +221,7 @@ class WalletBalanceChecker extends React.Component {
                 <div className="blueBoxStyle">
                     <label>Wallet address: </label>
                     <input type="text" value={this.state.walletAddress} onChange={e => this.handleWalletAddressChange(e)}/>
-                    <button onClick={() => this.handleCheckBalanceClick()}>Check balance</button>
+                    <button disabled = {!this.state.isValidAddress} onClick={() => this.handleCheckBalanceClick()}>Check balance</button>
                     { this.state.isOld ?
                         <p className="warningMessage"> this is old wallet</p> : ""
                     }

@@ -36,6 +36,7 @@ Execute following commands under "backend" folder
 the endpoint URL will be http://localhost:4000/
 
 ## 3. TODO
-- Implement input format validation for edited rate and address.  
+- Add code(method) explanation on backend API
+- perform pretty format into the code 
 - improve validation for each API.
 - remove debug code such as console.log
