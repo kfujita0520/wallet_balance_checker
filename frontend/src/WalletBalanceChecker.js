@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import './walletBalance.css';
-import { ethers } from 'ethers';
+import {ethers} from 'ethers';
 
 const apiHost = process.env.REACT_APP_API_HOST;
 
@@ -21,7 +21,7 @@ class RateEditor extends React.Component {
     }
 
     handleEditClick(event) {
-        this.setState({ isEditing: true });
+        this.setState({isEditing: true});
     };
 
     // handleEditClick = () => {
@@ -30,26 +30,26 @@ class RateEditor extends React.Component {
 
     async handleSaveClick(event) {
         console.log(`New text: ${this.state.editedRate}`);
-        this.setState({ isEditing: false });
+        this.setState({isEditing: false});
         this.props.updateRate(this.state.currency, this.state.editedRate);
         await axios.get(`${apiHost}/updateRate?currency=${this.state.currency}&rate=${this.state.editedRate}`);
     };
 
     handleCancelClick() {
         // Discard the edited text
-        this.setState({ editedRate: this.props.ethRate, isEditing: false });
+        this.setState({editedRate: this.props.ethRate, isEditing: false});
     };
 
     handleEditedTextChange(event) {
-        if(/^\d*\.?\d*$/.test(event.target.value)){//input format should be ddd.dd
+        if (/^\d*\.?\d*$/.test(event.target.value)) {//input format should be ddd.dd
             let rate = event.target.value;
-            if(rate === ""){ //if blank, set 0.00
+            if (rate === "") { //if blank, set 0.00
                 rate = "0.00";
             }
-            this.setState({ editedRate: rate });
-            this.setState({ isValidInput: true});
+            this.setState({editedRate: rate});
+            this.setState({isValidInput: true});
         } else { //input format is wrong
-            this.setState({ isValidInput: false});
+            this.setState({isValidInput: false});
         }
     };
 
@@ -60,22 +60,30 @@ class RateEditor extends React.Component {
     }
 
     render() {
-        const { isEditing } = this.state;
+        const {isEditing} = this.state;
 
         if (isEditing) {
             return (
                 <div>
-                    <input type="text" value={this.state.editedRate} onChange={ (e) => { this.handleEditedTextChange(e) }} />
-                    <button disabled={!this.state.isValidInput} onClick={(e)=>{this.handleSaveClick(e)}}>Save</button>
-                    <button onClick={()=>this.handleCancelClick()}>Cancel</button>
-                    {!this.state.isValidInput && <div style={{ color: "red" }}>Please enter a valid number</div>}
+                    <input type="text" value={this.state.editedRate} onChange={(e) => {
+                        this.handleEditedTextChange(e)
+                    }}/>
+                    <button disabled={!this.state.isValidInput} onClick={(e) => {
+                        this.handleSaveClick(e)
+                    }}>Save
+                    </button>
+                    <button onClick={() => this.handleCancelClick()}>Cancel</button>
+                    {!this.state.isValidInput && <div style={{color: "red"}}>Please enter a valid number</div>}
                 </div>
             );
         } else {
             return (
                 <div>
                     {this.showRateInfo()}
-                    <button onClick={(e)=>{this.handleEditClick(e)}}>Edit</button>
+                    <button onClick={(e) => {
+                        this.handleEditClick(e)
+                    }}>Edit
+                    </button>
                 </div>
             );
         }
@@ -107,17 +115,17 @@ class WalletBalanceChecker extends React.Component {
         console.log("test componentDidMount", apiHost);
         let rates = await axios.get(`${apiHost}/getRates`);
         console.log('rates: ', rates.data.usd);
-        this.setState({ ethUsdPrice: rates.data.usd, ethEurPrice: rates.data.eur });
+        this.setState({ethUsdPrice: rates.data.usd, ethEurPrice: rates.data.eur});
 
 
     }
 
     handleWalletAddressChange(event) {
 
-        if(ethers.isAddress(event.target.value)){
-            this.setState({ walletAddress: event.target.value, isValidAddress: true });
+        if (ethers.isAddress(event.target.value)) {
+            this.setState({walletAddress: event.target.value, isValidAddress: true});
         } else {
-            this.setState({ walletAddress: event.target.value, isValidAddress: false });
+            this.setState({walletAddress: event.target.value, isValidAddress: false});
         }
 
 
@@ -130,7 +138,7 @@ class WalletBalanceChecker extends React.Component {
                 // Convert balance from wei to ETH
                 //const ethBalance = Number(response.data.result) / 10 ** 18;
                 const ethBalance = response.data.ethAmount;
-                this.setState({ ethBalance });
+                this.setState({ethBalance});
             })
             .catch(error => {
                 console.error(error);
@@ -139,7 +147,7 @@ class WalletBalanceChecker extends React.Component {
         // Check if the wallet is old
         axios.get(`${apiHost}/checkOldWallet?address=${this.state.walletAddress}`)
             .then(response => {
-                this.setState({ isOld: response.data.result });
+                this.setState({isOld: response.data.result});
             })
             .catch(error => {
                 console.error(error);
@@ -153,9 +161,9 @@ class WalletBalanceChecker extends React.Component {
     updateRate(currency, rate) {
         console.log('currency', currency);
         console.log('rate', rate);
-        if(currency === "USD"){
+        if (currency === "USD") {
             this.setState({ethUsdPrice: rate});
-        } else if(currency === "EUR") {
+        } else if (currency === "EUR") {
             this.setState({ethEurPrice: rate});
         }
 
@@ -163,7 +171,7 @@ class WalletBalanceChecker extends React.Component {
 
     isOverOneYearOld(timestamp) {
         // Get the current timestamp
-        const now = Date.now() /1000;
+        const now = Date.now() / 1000;
 
         // Get the timestamp for one year ago
         const oneYearAgo = now - (365 * 24 * 60 * 60);
@@ -180,7 +188,7 @@ class WalletBalanceChecker extends React.Component {
 
 
     showETHBalance() {
-        if (this.state.currency === "USD"){
+        if (this.state.currency === "USD") {
             return (this.state.ethBalance * this.state.ethUsdPrice).toFixed(2) + " USD";
         } else if (this.state.currency === "EUR") {
             return (this.state.ethBalance * this.state.ethEurPrice).toFixed(2) + " EUR";
@@ -189,12 +197,13 @@ class WalletBalanceChecker extends React.Component {
 
     renderRateEditor() {
         let rate = "";
-        if(this.state.currency === "USD") {
+        if (this.state.currency === "USD") {
             rate = this.state.ethUsdPrice;
         } else if (this.state.currency === "EUR") {
             rate = this.state.ethEurPrice;
         }
-        return <RateEditor ethRate={rate} currency = {this.state.currency} updateRate={(currency, rate) => this.updateRate(currency, rate)}/>
+        return <RateEditor ethRate={rate} currency={this.state.currency}
+                           updateRate={(currency, rate) => this.updateRate(currency, rate)}/>
     }
 
     render() {
@@ -215,14 +224,17 @@ class WalletBalanceChecker extends React.Component {
                     {/*<p>ETH/EUR price: {this.state.ethEurPrice} EUR</p>*/}
                     {/*<p>---------------------------------</p>*/}
                     {/*should wait till RateEditor constructor has been populated with rate data being fetched through API*/}
-                    { this.state.ethUsdPrice !== "" && this.state.currency === "USD" && this.renderRateEditor() }
-                    { this.state.ethEurPrice !== "" && this.state.currency === "EUR" && this.renderRateEditor() }
+                    {this.state.ethUsdPrice !== "" && this.state.currency === "USD" && this.renderRateEditor()}
+                    {this.state.ethEurPrice !== "" && this.state.currency === "EUR" && this.renderRateEditor()}
                 </div>
                 <div className="blueBoxStyle">
                     <label>Wallet address: </label>
-                    <input type="text" value={this.state.walletAddress} onChange={e => this.handleWalletAddressChange(e)}/>
-                    <button disabled = {!this.state.isValidAddress} onClick={() => this.handleCheckBalanceClick()}>Check balance</button>
-                    { this.state.isOld ?
+                    <input type="text" value={this.state.walletAddress}
+                           onChange={e => this.handleWalletAddressChange(e)}/>
+                    <button disabled={!this.state.isValidAddress} onClick={() => this.handleCheckBalanceClick()}>Check
+                        balance
+                    </button>
+                    {this.state.isOld ?
                         <p className="warningMessage"> this is old wallet</p> : ""
                     }
                     <p>ETH balance: {this.state.ethBalance} ETH</p>
