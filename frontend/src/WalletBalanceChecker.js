@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import './walletBalance.css';
 
+const apiHost = process.env.REACT_APP_API_HOST;
 
 class RateEditor extends React.Component {
     constructor(props) {
@@ -25,10 +26,11 @@ class RateEditor extends React.Component {
     //     this.setState({ isEditing: true });
     // };
 
-    handleSaveClick(event) {
+    async handleSaveClick(event) {
         console.log(`New text: ${this.state.editedRate}`);
         this.setState({ isEditing: false });
         this.props.updateRate(this.state.currency, this.state.editedRate);
+        await axios.get(`${apiHost}/updateRate?currency=${this.state.currency}&rate=${this.state.editedRate}`);
     };
 
     handleCancelClick() {
@@ -89,23 +91,11 @@ class WalletBalanceChecker extends React.Component {
     }
 
     async componentDidMount() {
-        // Fetch ETH/USD price from API
-        await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd')
-            .then(response => {
-                this.setState({ ethUsdPrice: response.data.ethereum.usd });
-            })
-            .catch(error => {
-                console.error(error);
-            });
+        console.log("test componentDidMount", apiHost);
+        let rates = await axios.get(`${apiHost}/getRates`);
+        console.log('rates: ', rates.data.usd);
+        this.setState({ ethUsdPrice: rates.data.usd, ethEurPrice: rates.data.eur });
 
-        // Fetch ETH/EUR price from API
-        await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=eur')
-            .then(response => {
-                this.setState({ ethEurPrice: response.data.ethereum.eur });
-            })
-            .catch(error => {
-                console.error(error);
-            });
 
     }
 
@@ -115,22 +105,21 @@ class WalletBalanceChecker extends React.Component {
 
     handleCheckBalanceClick() {
         // Fetch ETH balance of specified wallet address from API
-        axios.get(`https://api.etherscan.io/api?module=account&action=balance&address=${this.state.walletAddress}&tag=latest&apikey=YourApiKeyToken`)
+        axios.get(`${apiHost}/getBalance?currency=${this.state.currency}&address=${this.state.walletAddress}`)
             .then(response => {
                 // Convert balance from wei to ETH
-                const ethBalance = Number(response.data.result) / 10 ** 18;
+                //const ethBalance = Number(response.data.result) / 10 ** 18;
+                const ethBalance = response.data.ethAmount;
                 this.setState({ ethBalance });
             })
             .catch(error => {
                 console.error(error);
             });
 
-        // Fetch ETH/EUR price from API
-        axios.get(`https://api.etherscan.io/api?module=account&action=txlist&address=${this.state.walletAddress}&startblock=0&page=1&offset=3&sort=desc&APIKey=NSZCD6S4TKVWRS13PMQFMVTNP6H7NAGHUY`)
+        // Check if the wallet is old
+        axios.get(`${apiHost}/checkOldWallet?address=${this.state.walletAddress}`)
             .then(response => {
-                console.log(response.data.result[0]);
-                console.log(this.isOverOneYearOld(response.data.result[0].timeStamp));
-                this.setState({ isOld: this.isOverOneYearOld(response.data.result[0].timeStamp) });
+                this.setState({ isOld: response.data.result });
             })
             .catch(error => {
                 console.error(error);

@@ -6,8 +6,8 @@ var logger = require('morgan');
 var session = require('express-session');
 var MemoryStore = require('memorystore')(session);
 const uuidv4 = require('uuid').v4;
+const cors = require('cors');
 require('dotenv').config();
-
 var indexRouter = require('./routes/index');
 
 var app = express();
@@ -31,10 +31,14 @@ app.use(session({
   genid: (req) => {
       return uuidv4(); // Generate a unique ID for each session
     },
-  secret: 'my-secret-key',
+  secret: process.env.SESSION_KEY,
   resave: false,
   saveUninitialized: false,
   store: sessionStore
+}));
+
+app.use(cors({
+  origin: [process.env.CORS_ORIGIN_HOST]
 }));
 
 app.use('/', indexRouter);
