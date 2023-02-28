@@ -10,6 +10,14 @@ router.get('/', function(req, res, next) {
     res.render('index', { title: 'Express' });
 });
 
+/**
+ * This endpoint return the rate of USD and EUR against ETH. If user already set own rate values, return these.
+ * If this is the first access for the user, fetch the initial market rate from 3rd party(coingecko in our case) API and return these.
+ *
+ * @returns {number} usd - usd rate
+ * @returns {number} eur - eur rate
+ * @returns {number} initialized - false if user first access to our site and do not have any session ID in their cookies of browser. True if user has sessionId in his browser cookies.
+ */
 router.get('/getRates', async function(req, res, next) {
 
     console.log("session id: ", req.session.id);
@@ -70,6 +78,15 @@ async function initiateRate(){
 
 }
 
+
+/**
+ * This endpoint updates the rate of given currency/ETH pair
+ * @param {string} rate - updated rate
+ * @param {string} currency - updated currency
+ * @returns {number} usd - usd rate after updated
+ * @returns {number} eur - eur rate after updated
+ * @returns {number} status - return 1 if API was properly processed, otherwise 0.
+ */
 router.get('/updateRate', async function(req, res, next) {
 
     const currency = req.query.currency;
@@ -114,6 +131,15 @@ router.get('/updateRate', async function(req, res, next) {
 
 });
 
+
+/**
+ * This endpoint return the balance of given address with given currency unit
+ * @param {string} address - address to check
+ * @param {string} currency - currency
+ * @returns {number} ethAmount - eth balance amount of given address
+ * @returns {number} currencyAmount - given fiat currency balance amount of given address
+ * @returns {number} status - return 1 if API was properly processed, otherwise 0.
+ */
 router.get('/getBalance', async function(req, res, next) {
 
     let currency = req.query.currency;
@@ -171,7 +197,13 @@ router.get('/getBalance', async function(req, res, next) {
 });
 
 
-//return true only if wallet has old transaction. Other case including input error will return false.
+
+/**
+ * This endpoint check if the latest transaction of given address is older than one year ago
+ * @param {string} address - address to check
+ * @returns {boolean} result - return true only if the latest transaction of given address is older than one year ago. If no transaction, return false.
+ * @returns {number} status - return 1 if API was properly processed, otherwise 0.
+ */
 router.get('/checkOldWallet', async function(req, res, next) {
 
     const walletAddress = req.query.address;
@@ -213,7 +245,11 @@ router.get('/checkOldWallet', async function(req, res, next) {
 
 });
 
-
+/**
+ * Judge if given timestamp is older than one year ago from current time.
+ * @param timestamp
+ * @returns {boolean}
+ */
 function isOverOneYear(timestamp) {
     // Get the current timestamp
     const now = Date.now() /1000;
